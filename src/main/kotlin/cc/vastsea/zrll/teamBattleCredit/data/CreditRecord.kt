@@ -1,5 +1,9 @@
 package cc.vastsea.zrll.teamBattleCredit.data
 
+import kotlinx.serialization.Serializable
 
-class CreditRecord {
-}
+@Serializable
+data class CreditRecord (
+    val team: String,
+    val credit: Int,
+)

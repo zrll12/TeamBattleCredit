@@ -25,6 +25,8 @@ class TeamBattleCredit : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(PlayerDeath(), this)
         Bukkit.getPluginManager().registerEvents(PlayerRespawn(), this)
 
+        saveDefaultConfig()
+
         logger.info("Enabled ${this.name}")
     }
 

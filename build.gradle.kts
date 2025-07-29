@@ -20,8 +20,8 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
-    implementation("org.mongodb:bson-kotlinx:5.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 }
 
