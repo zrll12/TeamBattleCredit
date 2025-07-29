@@ -1,0 +1,5 @@
+name: TeamBattleCredit
+version: '0.1'
+main: cc.vastsea.zrll.teamBattleCredit.TeamBattleCredit
+api-version: '1.21'
+depend: [ LuckPerms, Kotlin ]
