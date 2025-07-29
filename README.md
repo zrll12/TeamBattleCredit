@@ -32,8 +32,11 @@
 # 默认积分值
 defaultCredit: 100
 
+# 默认死亡惩罚积分
+defaultCost: 0
+
 # 死亡惩罚规则
-# 格式: 时间(秒): 扣除积分
+# 格式: 时间戳(秒): 扣除积分
 deathCost:
   0: 1  # 默认扣除1点积分
   3600: 2  # 1小时后扣除2点积分
@@ -61,7 +64,7 @@ deathCost:
 
 - `%TeamBattleCredit_self_team%` - 显示玩家所在队伍
 - `%TeamBattleCredit_self_credit%` - 显示玩家所在队伍的积分
-- `%TeamBattleCredit_other_credit_<队伍名>%` - 显示指定队伍的积分
+- `%` - 显示指定队伍的积分
 
 ## 工作原理
 
