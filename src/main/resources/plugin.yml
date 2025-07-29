@@ -3,3 +3,24 @@ version: '0.1'
 main: cc.vastsea.zrll.teamBattleCredit.TeamBattleCredit
 api-version: '1.21'
 depend: [ LuckPerms, Kotlin ]
+softdepend: ["PlaceholderAPI"]
+
+commands:
+  credit:
+    description: 管理队伍积分
+    usage: /credit <give|remove|reload>
+    permission: teambattlecredit.command
+
+permissions:
+  teambattlecredit.command:
+    description: 允许使用/credit命令
+    default: op
+  teambattlecredit.reload:
+    description: 允许重新加载插件配置
+    default: op
+  teambattlecredit.give:
+    description: 允许给队伍添加积分
+    default: op
+  teambattlecredit.remove:
+    description: 允许从队伍移除积分
+    default: op

@@ -74,6 +74,88 @@ object DataManager {
         }
     }
 
+    /**
+     * 增加队伍积分
+     * @param team 队伍名称
+     * @param amount 增加的积分数量
+     * @param player 可选的玩家UUID
+     * @param message 可选的消息
+     * @return 更新后的积分
+     */
+    fun addCredit(team: String, amount: Int, player: UUID? = null, message: String? = null): Int {
+        val currentCredit = credit.find { it.team == team }
+        val newCreditValue = if (currentCredit == null) {
+            defaultCredit + amount
+        } else {
+            currentCredit.credit + amount
+        }
+        
+        // 更新积分记录
+        if (currentCredit == null) {
+            credit = credit + CreditRecord(team, newCreditValue)
+        } else {
+            val updatedCredit = CreditRecord(team, newCreditValue)
+            credit = credit.filter { it.team != team } + updatedCredit
+        }
+        
+        // 记录活动
+        if (player != null) {
+            val newActivity = ActivityRecord(
+                team = team,
+                player = player.toString(),
+                deathMessage = message,
+                amount = amount,
+                deathTime = System.currentTimeMillis().toString()
+            )
+            activity = activity + newActivity
+        }
+        
+        TeamBattleCredit.instance.logger.info("Added credit: $amount for team: $team, new credit: $newCreditValue")
+        saveData()
+        return newCreditValue
+    }
+    
+    /**
+     * 减少队伍积分
+     * @param team 队伍名称
+     * @param amount 减少的积分数量
+     * @param player 可选的玩家UUID
+     * @param message 可选的消息
+     * @return 更新后的积分
+     */
+    fun removeCredit(team: String, amount: Int, player: UUID? = null, message: String? = null): Int {
+        val currentCredit = credit.find { it.team == team }
+        val newCreditValue = if (currentCredit == null) {
+            defaultCredit - amount
+        } else {
+            currentCredit.credit - amount
+        }
+        
+        // 更新积分记录
+        if (currentCredit == null) {
+            credit = credit + CreditRecord(team, newCreditValue)
+        } else {
+            val updatedCredit = CreditRecord(team, newCreditValue)
+            credit = credit.filter { it.team != team } + updatedCredit
+        }
+        
+        // 记录活动
+        if (player != null) {
+            val newActivity = ActivityRecord(
+                team = team,
+                player = player.toString(),
+                deathMessage = message,
+                amount = -amount, // 使用负值表示减少
+                deathTime = System.currentTimeMillis().toString()
+            )
+            activity = activity + newActivity
+        }
+        
+        TeamBattleCredit.instance.logger.info("Removed credit: $amount from team: $team, new credit: $newCreditValue")
+        saveData()
+        return newCreditValue
+    }
+    
     fun recordDeath(team: String, player: UUID, deathMessage: String?) {
         var deathAmount = TeamBattleCredit.instance.config.getInt("defaultCost")
         try {
@@ -83,26 +165,10 @@ object DataManager {
         } catch (_: Exception) {
         }
 
-        val newActivity = ActivityRecord(
-            team = team,
-            player = player.toString(),
-            deathMessage = deathMessage,
-            amount = deathAmount,
-            deathTime = System.currentTimeMillis().toString()
-        )
-        activity = activity + newActivity
-
-        val currentCredit = credit.find { it.team == team }
-        if (currentCredit == null) {
-            credit = credit + CreditRecord(team, defaultCredit - deathAmount)
-        } else {
-            val updatedCredit = CreditRecord(team, currentCredit.credit - deathAmount)
-            credit = credit.filter { it.team != team } + updatedCredit
-        }
-
+        // 使用removeCredit函数减少积分并记录活动
+        removeCredit(team, deathAmount, player, deathMessage)
+        
         TeamBattleCredit.instance.logger.info("Applied death cost: $deathAmount for team: $team, player: $player")
-
-        saveData()
     }
 
     fun canRespawn(team: String): Boolean {
