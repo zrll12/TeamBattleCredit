@@ -14,7 +14,7 @@
 ## 依赖
 
 - [LuckPerms](https://luckperms.net/) - 用于团队(组)管理
-- [Kotlin](https://www.spigotmc.org/resources/kotlin.80808/) - Kotlin语言支持
+- [KotlinMC](https://modrinth.com/plugin/kotlinmc) - Kotlin语言支持
 - [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) (可选) - 提供占位符支持
 
 ## 安装
@@ -64,7 +64,7 @@ deathCost:
 
 - `%TeamBattleCredit_self_team%` - 显示玩家所在队伍
 - `%TeamBattleCredit_self_credit%` - 显示玩家所在队伍的积分
-- `%` - 显示指定队伍的积分
+- `%TeamBattleCredit_other_credit_<队伍名>%` - 显示指定队伍的积分
 
 ## 工作原理
 
