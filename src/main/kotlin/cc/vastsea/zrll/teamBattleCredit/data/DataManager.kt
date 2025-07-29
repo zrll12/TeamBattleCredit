@@ -49,7 +49,7 @@ object DataManager {
             emptyList()
         }
 
-        defaultCredit = TeamBattleCredit.instance.config.getInt("defaultCredit", 1000)
+        defaultCredit = TeamBattleCredit.instance.config.getInt("defaultCredit")
 
         val costs = TeamBattleCredit.instance.config
             .getConfigurationSection("deathCost")?.getKeys(false) ?: emptySet()
