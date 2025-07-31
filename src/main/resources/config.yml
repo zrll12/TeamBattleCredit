@@ -1,5 +1,12 @@
 defaultCredit: 1000
 defaultCost: 0
+
+creditNotifications:
+  900: "&c[系统] &e{team} &f队伍积分已降至 &c{credit} &f点！"
+  500: "&c[系统] &e{team} &f队伍积分已降至 &c{credit} &f点，请小心行动！"
+  200: "&c[系统] &e{team} &f队伍积分已降至危险水平：&c{credit} &f点！"
+  50: "&c[警告] &e{team} &f队伍积分即将耗尽：&c{credit} &f点！"
+
 deathCost:
   # 10:00
   1753840800: 5
@@ -15,4 +22,3 @@ deathCost:
   1753880400: 50
   # 23:30
   1753889400: 1000
-

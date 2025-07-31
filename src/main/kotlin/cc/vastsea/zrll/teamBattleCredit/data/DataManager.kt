@@ -5,6 +5,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
+import org.bukkit.Bukkit
 import java.util.*
 
 
@@ -16,6 +17,7 @@ object DataManager {
     lateinit var credit: List<CreditRecord>
     lateinit var activity: List<ActivityRecord>
     lateinit var cost: List<DeathCost>
+    lateinit var creditNotifications: List<CreditNotification>
     var defaultCredit: Int = 1000
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -56,7 +58,17 @@ object DataManager {
         cost = costs.map { time ->
             val costValue = TeamBattleCredit.instance.config.getInt("deathCost.$time")
             DeathCost(time.toInt(), costValue)
-        }
+        }.sortedBy { it.time }
+
+        val notifications = TeamBattleCredit.instance.config
+            .getConfigurationSection("creditNotifications")?.getKeys(false) ?: emptySet()
+        creditNotifications = notifications.map { key ->
+            val message = TeamBattleCredit.instance.config.getString("creditNotifications.$key")
+            CreditNotification(
+                key.toIntOrNull() ?: 0,
+                message ?: "队伍 {team} 的积分已达到 {credit} 点"
+            )
+        }.sortedBy { it.credit }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -89,7 +101,7 @@ object DataManager {
         } else {
             currentCredit.credit + amount
         }
-        
+
         // 更新积分记录
         if (currentCredit == null) {
             credit = credit + CreditRecord(team, newCreditValue)
@@ -97,7 +109,7 @@ object DataManager {
             val updatedCredit = CreditRecord(team, newCreditValue)
             credit = credit.filter { it.team != team } + updatedCredit
         }
-        
+
         // 记录活动
         if (player != null) {
             val newActivity = ActivityRecord(
@@ -109,12 +121,12 @@ object DataManager {
             )
             activity = activity + newActivity
         }
-        
+
         TeamBattleCredit.instance.logger.info("Added credit: $amount for team: $team, new credit: $newCreditValue")
         saveData()
         return newCreditValue
     }
-    
+
     /**
      * 减少队伍积分
      * @param team 队伍名称
@@ -130,7 +142,7 @@ object DataManager {
         } else {
             currentCredit.credit - amount
         }
-        
+
         // 更新积分记录
         if (currentCredit == null) {
             credit = credit + CreditRecord(team, newCreditValue)
@@ -138,7 +150,7 @@ object DataManager {
             val updatedCredit = CreditRecord(team, newCreditValue)
             credit = credit.filter { it.team != team } + updatedCredit
         }
-        
+
         // 记录活动
         if (player != null) {
             val newActivity = ActivityRecord(
@@ -150,12 +162,15 @@ object DataManager {
             )
             activity = activity + newActivity
         }
-        
+
+        // 检查是否达到通知阈值并发送通知
+        checkCreditThresholdAndNotify(team, currentCredit?.credit ?: defaultCredit, newCreditValue)
+
         TeamBattleCredit.instance.logger.info("Removed credit: $amount from team: $team, new credit: $newCreditValue")
         saveData()
         return newCreditValue
     }
-    
+
     fun recordDeath(team: String, player: UUID, deathMessage: String?) {
         var deathAmount = TeamBattleCredit.instance.config.getInt("defaultCost")
         try {
@@ -167,12 +182,35 @@ object DataManager {
 
         // 使用removeCredit函数减少积分并记录活动
         removeCredit(team, deathAmount, player, deathMessage)
-        
+
         TeamBattleCredit.instance.logger.info("Applied death cost: $deathAmount for team: $team, player: $player")
     }
 
     fun canRespawn(team: String): Boolean {
         val currentCredit = credit.find { it.team == team } ?: return true
         return currentCredit.credit >= 0
+    }
+
+    /**
+     * 检查队伍积分是否达到通知阈值，如果达到则向所有玩家发送通知
+     * @param team 队伍名称
+     * @param currentCredit 当前积分
+     */
+    private fun checkCreditThresholdAndNotify(team: String, beforeCredit: Int, currentCredit: Int) {
+        try {
+            val message = creditNotifications.first {
+                beforeCredit > it.credit && currentCredit <= it.credit
+            }
+
+            val formattedMessage = message.message
+                .replace("{team}", team)
+                .replace("{credit}", currentCredit.toString())
+                .replace("&", "§")
+
+            Bukkit.getOnlinePlayers().forEach { player ->
+                player.sendMessage(formattedMessage)
+            }
+        } catch (_: NoSuchElementException) {
+        }
     }
 }
